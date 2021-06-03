@@ -16,7 +16,7 @@ class BasicInfo(Resource):
     MONGO_DB = os.getenv("MONGO_DB")
     uri = f'mongodb+srv://{MONGO_USR}:{MONGO_PWD}@hanabitube.f7jyw.mongodb.net/{MONGO_DB}?' \
           f'retryWrites=true&w=majority'
-    logging.debug(uri)
+
     app.config["MONGO_URI"] = uri
     mongo = PyMongo(app)
 
@@ -27,8 +27,14 @@ class BasicInfo(Resource):
             return jsonify(b)
         return {'msg': 'The requested object does not exist.'}, 404
 
+    def get(self, test):
+        if test == 1:
+            logging.debug(self.uri)
+        return {'msg': 'Please check the log file'}
 
-api.add_resource(BasicInfo, '/basic')
+
+api.add_resource(BasicInfo,
+                 '/basic', '/basic/<int:test>')
 
 
 if __name__ == '__main__':
