@@ -24,20 +24,15 @@ class BasicInfo(Resource):
     mongo = PyMongo(app)
 
     def get(self):
+        logging.info(self.uri)
         b = self.mongo.db.basic.find_one()
         if b:
             b.pop('_id')
             return jsonify(b)
         return {'msg': 'The requested object does not exist.'}, 404
 
-    def get(self, test):
-        if test == 1:
-            logging.debug(self.uri)
-        return {'msg': 'Please check the log file'}
 
-
-api.add_resource(BasicInfo,
-                 '/basic', '/basic/<int:test>')
+api.add_resource(BasicInfo, '/basic')
 
 
 if __name__ == '__main__':
