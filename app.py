@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 from flask import Flask, jsonify
 from flask_pymongo import PyMongo
@@ -11,6 +12,8 @@ api = Api(app)
 
 class BasicInfo(Resource):
     logging.basicConfig(filename='mongo.log', encoding='utf-8', level=logging.DEBUG)
+    app.logger.addHandler(logging.StreamHandler(sys.stdout))
+    app.logger.setLevel(logging.ERROR)
     MONGO_USR = os.getenv("MONGO_USR")
     MONGO_PWD = os.getenv("MONGO_PWD")
     MONGO_DB = os.getenv("MONGO_DB")
