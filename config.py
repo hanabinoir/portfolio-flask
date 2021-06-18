@@ -17,7 +17,7 @@ class Config:
             'db': os.getenv('MONGO_DB'),
         })
 
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{usr}:{pwd}@{host}/{db}'\
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{usr}:{pwd}@{host}/{db}' \
         .format(**{
             'usr': os.getenv('MYSQL_USR'),
             'pwd': os.getenv('MYSQL_PWD'),
