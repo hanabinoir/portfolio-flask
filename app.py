@@ -15,7 +15,7 @@ app.config.from_object(config.Config)
 
 # logger
 app.logger.addHandler(logging.StreamHandler(sys.stdout))
-app.logger.setLevel(logging.INFO)
+app.logger.setLevel(logging.ERROR)
 
 # mongo
 mongo.init_app(app)
