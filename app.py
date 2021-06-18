@@ -1,39 +1,30 @@
 import logging
-import os
 import sys
 
-from flask import Flask, jsonify
-from flask_pymongo import PyMongo
-from flask_restful import Resource, Api
+from flask import Flask
+from flask_restful import Api
+
+import config
+from routes import mongo, BasicInfo, Auth
+from models import sa
 
 app = Flask(__name__)
+# config
+app.config.from_object(config.Config)
+
+# logger
+app.logger.addHandler(logging.StreamHandler(sys.stdout))
+app.logger.setLevel(logging.INFO)
+
+# mongo
+mongo.init_app(app)
+# sql
+sa.init_app(app)
+
 api = Api(app)
-
-
-class BasicInfo(Resource):
-    logging.basicConfig(filename='mongo.log', encoding='utf-8', level=logging.DEBUG)
-    app.logger.addHandler(logging.StreamHandler(sys.stdout))
-    app.logger.setLevel(logging.ERROR)
-    MONGO_USR = os.getenv("MONGO_USR")
-    MONGO_PWD = os.getenv("MONGO_PWD")
-    MONGO_DB = os.getenv("MONGO_DB")
-    uri = f'mongodb+srv://{MONGO_USR}:{MONGO_PWD}@hanabitube.f7jyw.mongodb.net/{MONGO_DB}?' \
-          f'retryWrites=true&w=majority'
-
-    app.config["MONGO_URI"] = uri
-    mongo = PyMongo(app)
-
-    def get(self):
-        logging.info(self.uri)
-        b = self.mongo.db.basic.find_one()
-        if b:
-            b.pop('_id')
-            return jsonify(b)
-        return {'msg': 'The requested object does not exist.'}, 404
-
-
+# resources
 api.add_resource(BasicInfo, '/basic')
-
+api.add_resource(Auth, '/user')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
