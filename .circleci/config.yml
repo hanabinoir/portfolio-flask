@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: cimg/python:3.9.5
+        environment:
+          DEBUG: True
+          MONGO_USR: $MONGO_USR
+          MONGO_PWD: $MONGO_PWD
+          MONGO_HOST: $MONGO_HOST
+          MONGO_DB: $MONGO_DB
+          MYSQL_USR: $MYSQL_USR
+          MYSQL_PWD: $MYSQL_PWD
+          MYSQL_HOST: $MYSQL_HOST
+          MYSQL_DB: MYSQL_DB
+    executor: macos/default
+    steps:
+      - checkout
+      - restore_cache:
+          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+      - run:
+          name: Install Python Dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+      - save_cache:
+          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - "venv"
