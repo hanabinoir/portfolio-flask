@@ -14,11 +14,9 @@ class Config:
                 f"{os.getenv('MONGO_HOST')}/" \
                 f"{os.getenv('MONGO_DB')}?" \
                 'retryWrites=true&w=majority'
-    logging.info(MONGO_URI)
 
     SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{os.getenv('MYSQL_USR')}:" \
                               f"{os.getenv('MYSQL_PWD')}@" \
                               f"{os.getenv('MYSQL_HOST')}/" \
                               f"{os.getenv('MYSQL_DB')}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    logging.info(SQLALCHEMY_DATABASE_URI)
