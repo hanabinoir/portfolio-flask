@@ -22,7 +22,7 @@ load_dotenv()
 ON_CLOUD = os.getenv('CLOUD')
 if ON_CLOUD:
     app.config['MONGO_URI'] = os.getenv('MONGO_URL')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('JAWSDB_URL')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('MYSQL_URL')
 
 # logger
 app.logger.addHandler(logging.StreamHandler(sys.stdout))
