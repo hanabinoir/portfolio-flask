@@ -4,6 +4,7 @@ import uuid
 from email_validator import validate_email, EmailNotValidError
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from sqlalchemy import or_
 from sqlalchemy.orm import validates
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -23,6 +24,21 @@ class User(sa.Model):
         self.id = str(uuid.uuid4())
         self.username = username
         self.email = email
+
+    def create(self, pwd):
+        self.set_password(pwd)
+        sa.session.add(self)
+        sa.session.commit()
+
+    @classmethod
+    def find(cls, username, email):
+        res = cls.query.filter(
+                or_(
+                    User.username == username,
+                    User.email == email
+                )
+            ).first()
+        return res
 
     def set_password(self, pwd):
         if not pwd:
@@ -64,9 +80,23 @@ class User(sa.Model):
             raise AssertionError(str(e))
 
 
+class Role(sa.Model):
+    __tablename__ = 'roles'
+    id = sa.Column(sa.Integer, primary_key=True)
+    name = sa.Column(sa.String(25), nullable=False)
+
+
 class UserSchema(SQLAlchemySchema):
     class Meta:
         model = User
 
     id = auto_field()
     username = auto_field()
+
+
+class RoleSchema(SQLAlchemySchema):
+    class Meta:
+        model = Role
+
+    id = auto_field()
+    name = auto_field()
