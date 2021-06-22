@@ -4,21 +4,26 @@ import uuid
 from email_validator import validate_email, EmailNotValidError
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
-from sqlalchemy import or_
-from sqlalchemy.orm import validates
+from sqlalchemy import or_, Table, Column, String, Integer, ForeignKey, DateTime, func
+from sqlalchemy.orm import validates, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
 sa = SQLAlchemy()
 
+user_roles = Table('user_roles', sa.metadata,
+                   Column('user_id', String(50), ForeignKey('user.id')),
+                   Column('role_id', Integer, ForeignKey('role.id')))
+
 
 class User(sa.Model):
     __tablename__ = 'user'
-    id = sa.Column(sa.String, primary_key=True)
-    email = sa.Column(sa.String(50), index=True, unique=True, nullable=False)
-    username = sa.Column(sa.String(50), index=True, unique=True, nullable=False)
-    password_hash = sa.Column(sa.String(255), nullable=False)
-    created_at = sa.Column(sa.DateTime, server_default=sa.func.now())
-    updated_at = sa.Column(sa.DateTime, server_default=sa.func.now(), server_onupdate=sa.func.now())
+    id = Column(String, primary_key=True)
+    email = Column(String(50), index=True, unique=True, nullable=False)
+    username = Column(String(50), index=True, unique=True, nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
+    roles = relationship('Role', secondary=user_roles, backref='users')
 
     def __init__(self, username, email):
         self.id = str(uuid.uuid4())
@@ -82,8 +87,8 @@ class User(sa.Model):
 
 class Role(sa.Model):
     __tablename__ = 'roles'
-    id = sa.Column(sa.Integer, primary_key=True)
-    name = sa.Column(sa.String(25), nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(25), nullable=False)
 
 
 class UserSchema(SQLAlchemySchema):
@@ -92,6 +97,7 @@ class UserSchema(SQLAlchemySchema):
 
     id = auto_field()
     username = auto_field()
+    # roles = fields.Nested('RoleSchema', many=True, exclude=('user',))
 
 
 class RoleSchema(SQLAlchemySchema):
@@ -100,3 +106,4 @@ class RoleSchema(SQLAlchemySchema):
 
     id = auto_field()
     name = auto_field()
+    # users = fields.Nested('UserSchema', many=True, exclude=('role',))
