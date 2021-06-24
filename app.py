@@ -3,6 +3,7 @@ import os
 import sys
 
 from flask import Flask
+from flask_cors import CORS
 from flask_restful import Api
 from dotenv import load_dotenv
 
@@ -14,6 +15,8 @@ from models import sa
 app = Flask(__name__)
 # config
 app.config.from_object(config.Config)
+
+CORS(app)
 
 ''' 
 Temporary solution for Heroku environment 
