@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 import config
 from auth import auth
-from routes import mongo, BasicInfo, Auth
+from routes import mongo, Basic, Profile, Auth
 from models import sa
 
 app = Flask(__name__)
@@ -38,7 +38,8 @@ sa.init_app(app)
 
 api = Api(app)
 # resources
-api.add_resource(BasicInfo, '/basic')
+api.add_resource(Basic, '/basic')
+api.add_resource(Profile, '/profile')
 api.add_resource(Auth, '/user')
 app.register_blueprint(auth)
 

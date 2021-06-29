@@ -9,22 +9,43 @@ parser.add_argument('lang', type=str, help='default: JP')
 mongo = PyMongo()
 
 
-class BasicInfo(Resource):
-    def get(self):
-        args = parser.parse_args(strict=True)
-        lang = args['lang']
-        if lang:
-            lang = lang.strip().upper()
-        langs = ['EN', 'JP']
-        if not lang or lang not in langs:
-            b = mongo.db.basic.find_one({'lang': 'EN'})
-        else:
-            b = mongo.db.basic.find_one({'lang': lang})
+def search_by_collection(collection):
+    args = parser.parse_args(strict=True)
+    lang = args['lang']
+    if lang:
+        lang = lang.strip().upper()
+    langs = ['EN', 'JP']
+    if not lang or lang not in langs:
+        res = mongo.db[collection].find_one({'lang': 'EN'})
+    else:
+        res = mongo.db[collection].find_one({'lang': lang})
 
-        if b:
-            b.pop('_id')
-            return jsonify(b)
-        return {'msg': 'The requested object does not exist.'}, 404
+    return res
+
+
+def make_result(res):
+    if res:
+        res.pop('_id')
+        return jsonify(res)
+    return {'msg': 'The requested object does not exist.'}, 404
+
+
+class Basic(Resource):
+    def get(self):
+        res = search_by_collection('basic')
+        return make_result(res)
+
+
+class Profile(Resource):
+    def get(self):
+        res = search_by_collection('profile')
+        return make_result(res)
+
+
+class Contact(Resource):
+    def get(self):
+        res = search_by_collection('contact')
+        return make_result(res)
 
 
 class Auth(Resource):
