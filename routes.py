@@ -9,9 +9,13 @@ parser.add_argument('lang', type=str, help='default: JP')
 mongo = PyMongo()
 
 
-def search_by_collection(collection):
+def search_by_collection(collection, by_lang=True):
     args = parser.parse_args(strict=True)
     lang = args['lang']
+
+    if not by_lang:
+        return mongo.db[collection].find_one()
+
     if lang:
         lang = lang.strip().upper()
     langs = ['EN', 'JP']
@@ -44,7 +48,7 @@ class Profile(Resource):
 
 class Contact(Resource):
     def get(self):
-        res = search_by_collection('contact')
+        res = search_by_collection('contact', by_lang=False)
         return make_result(res)
 
 
