@@ -1,6 +1,8 @@
 from flask import jsonify
 from flask_pymongo import PyMongo
 from flask_restful import Resource, reqparse
+
+from auth import admin_required
 from models import User, UserSchema
 
 parser = reqparse.RequestParser()
@@ -25,6 +27,10 @@ class BasicInfo(Resource):
             b.pop('_id')
             return jsonify(b)
         return {'msg': 'The requested object does not exist.'}, 404
+
+    @admin_required()
+    def post(self):
+        pass
 
 
 class Auth(Resource):

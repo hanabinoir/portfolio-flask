@@ -1,10 +1,10 @@
 from functools import wraps
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, make_response
 from flask_jwt_extended import create_access_token, create_refresh_token, \
     jwt_required, get_jwt_identity, JWTManager, verify_jwt_in_request, get_jwt
 
-from models import User, sa, RoleSchema
+from models import User
 
 auth = Blueprint('auth', __name__)
 jwt = JWTManager()
@@ -19,7 +19,7 @@ def admin_required():
             if claims["is_admin"]:
                 return fn(*args, **kwargs)
             else:
-                return jsonify(msg="Admins only!"), 403
+                return make_response(jsonify(msg="Admins only!"), 403)
 
         return decorator
 
@@ -55,12 +55,10 @@ def login():
     elif not user.check_password(data['password']):
         return jsonify({'msg': 'Password incorrect'}), 401
 
-    # roles = RoleSchema().dump(user.roles)
     access_token = create_access_token(
         identity=user.id,
         additional_claims={
-            'is_admin': False
-            # 'is_admin': any(x.name.upper() == "ADMIN" for x in roles)
+            'is_admin': any(x.id == 1 for x in user.roles)
         })
     refresh_token = create_refresh_token(identity=user.id)
     return jsonify(access_token=access_token, refresh_token=refresh_token)

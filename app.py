@@ -2,14 +2,14 @@ import logging
 import os
 import sys
 
+from dotenv import load_dotenv
 from flask import Flask
 from flask_restful import Api
-from dotenv import load_dotenv
 
 import config
 from auth import auth, jwt
-from routes import mongo, BasicInfo, Auth
 from models import sa
+from routes import mongo, BasicInfo, Auth
 
 app = Flask(__name__)
 # config
