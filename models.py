@@ -2,27 +2,53 @@ import re
 import uuid
 
 from email_validator import validate_email, EmailNotValidError
+from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
-from sqlalchemy.orm import validates
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
+from sqlalchemy import or_, Table, Column, String, Integer, ForeignKey, DateTime, func
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import validates, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
 sa = SQLAlchemy()
+Base = declarative_base()
+Base.query = sa.session.query_property()
+
+user_roles = Table('user_roles', Base.metadata,
+                   Column('user_id', String(50), ForeignKey('user.id')),
+                   Column('role_id', Integer, ForeignKey('role.id')))
 
 
-class User(sa.Model):
+class User(Base, UserMixin):
     __tablename__ = 'user'
-    id = sa.Column(sa.String, primary_key=True)
-    email = sa.Column(sa.String(50), index=True, unique=True, nullable=False)
-    username = sa.Column(sa.String(50), index=True, unique=True, nullable=False)
-    password_hash = sa.Column(sa.String(255), nullable=False)
-    created_at = sa.Column(sa.DateTime, server_default=sa.func.now())
-    updated_at = sa.Column(sa.DateTime, server_default=sa.func.now(), server_onupdate=sa.func.now())
+
+    id = Column(String(50), primary_key=True)
+    email = Column(String(255), index=True, unique=True, nullable=False)
+    username = Column(String(20), index=True, unique=True, nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), server_onupdate=func.now())
+    roles = relationship('Role', secondary=user_roles, backref='users')
 
     def __init__(self, username, email):
         self.id = str(uuid.uuid4())
         self.username = username
         self.email = email
+
+    def create(self, pwd):
+        self.set_password(pwd)
+        sa.session.add(self)
+        sa.session.commit()
+
+    @classmethod
+    def find(cls, username, email):
+        res = cls.query.filter(
+                or_(
+                    User.username == username,
+                    User.email == email
+                )
+            ).first()
+        return res
 
     def set_password(self, pwd):
         if not pwd:
@@ -64,9 +90,26 @@ class User(sa.Model):
             raise AssertionError(str(e))
 
 
+class Role(Base):
+    __tablename__ = 'role'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(25), nullable=False)
+
+
 class UserSchema(SQLAlchemySchema):
     class Meta:
         model = User
 
     id = auto_field()
     username = auto_field()
+    roles = fields.Nested('RoleSchema', many=True, exclude=('users',))
+
+
+class RoleSchema(SQLAlchemySchema):
+    class Meta:
+        model = Role
+
+    id = auto_field()
+    name = auto_field()
+    users = fields.Nested('UserSchema', many=True, exclude=('roles',))

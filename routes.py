@@ -1,6 +1,8 @@
 from flask import jsonify
 from flask_pymongo import PyMongo
 from flask_restful import Resource, reqparse
+
+from auth import admin_required
 from models import User, UserSchema
 
 parser = reqparse.RequestParser()
@@ -50,6 +52,10 @@ class Contact(Resource):
     def get(self):
         res = search_by_collection('contact', by_lang=False)
         return make_result(res)
+
+    @admin_required()
+    def post(self):
+        pass
 
 
 class Auth(Resource):

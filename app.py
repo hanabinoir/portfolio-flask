@@ -2,13 +2,13 @@ import logging
 import os
 import sys
 
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
-from dotenv import load_dotenv
 
 import config
-from auth import auth
+from auth import auth, jwt
 from routes import mongo, Basic, Profile, Auth, Contact
 from models import sa
 
@@ -30,6 +30,9 @@ if ON_CLOUD:
 # logger
 app.logger.addHandler(logging.StreamHandler(sys.stdout))
 app.logger.setLevel(logging.ERROR)
+
+# JWT
+jwt.init_app(app)
 
 # mongo
 mongo.init_app(app)
