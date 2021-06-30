@@ -4,16 +4,19 @@ import sys
 
 from dotenv import load_dotenv
 from flask import Flask
+from flask_cors import CORS
 from flask_restful import Api
 
 import config
 from auth import auth, jwt
+from routes import mongo, Basic, Profile, Auth, Contact
 from models import sa
-from routes import mongo, BasicInfo, Auth
 
 app = Flask(__name__)
 # config
 app.config.from_object(config.Config)
+
+CORS(app)
 
 ''' 
 Temporary solution for Heroku environment 
@@ -38,7 +41,9 @@ sa.init_app(app)
 
 api = Api(app)
 # resources
-api.add_resource(BasicInfo, '/basic')
+api.add_resource(Basic, '/basic')
+api.add_resource(Profile, '/profile')
+api.add_resource(Contact, '/contact')
 api.add_resource(Auth, '/user')
 app.register_blueprint(auth)
 
