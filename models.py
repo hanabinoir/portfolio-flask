@@ -2,7 +2,6 @@ import re
 import uuid
 
 from email_validator import validate_email, EmailNotValidError
-from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
 from sqlalchemy import or_, Table, Column, String, Integer, ForeignKey, DateTime, func
@@ -19,7 +18,7 @@ user_roles = Table('user_roles', Base.metadata,
                    Column('role_id', Integer, ForeignKey('role.id')))
 
 
-class User(Base, UserMixin):
+class User(Base):
     __tablename__ = 'user'
 
     id = Column(String(50), primary_key=True)
